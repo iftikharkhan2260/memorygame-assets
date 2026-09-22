@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Memory Match — flip, match, and order from the deck</title>
+<meta name="description" content="A free offline memory-match game for one or two players, where every card doubles as something you can order over WhatsApp." />
+<link rel="icon" href="favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top">
+      <img src="images/app-icon.png" alt="" />
+      Memory Match
+    </a>
+    <ul class="nav-links">
+      <li><a href="#how">How it plays</a></li>
+      <li><a href="#catalog">Browse & order</a></li>
+      <li><a href="#fresh">Always fresh</a></li>
+      <li><a href="#get">Get the app</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <h1>Flip two cards.<br>Find a match.<br>Keep your turn.</h1>
+      <p class="lead">A free, offline memory game for one or two players — with a twist: every card in the deck is something you can actually order, right from the app.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="#get">Get the app</a>
+        <a class="btn btn-ghost" href="#catalog">Browse the catalog</a>
+      </div>
+    </div>
+    <div class="flip-grid" aria-hidden="true">
+      <div class="flip-card"><div class="face back"></div><div class="face front">🍎</div></div>
+      <div class="flip-card"><div class="face back"></div><div class="face front">🍌</div></div>
+      <div class="flip-card"><div class="face back"></div><div class="face front">🍇</div></div>
+      <div class="flip-card"><div class="face back"></div><div class="face front">🍓</div></div>
+      <div class="flip-card"><div class="face back"></div><div class="face front">🍒</div></div>
+      <div class="flip-card"><div class="face back"></div><div class="face front">🍉</div></div>
+      <div class="flip-card"><div class="face back"></div><div class="face front">🥝</div></div>
+      <div class="flip-card"><div class="face back"></div><div class="face front">🍍</div></div>
+      <div class="flip-card"><div class="face back"></div><div class="face front">🥭</div></div>
+    </div>
+  </div>
+</header>
+
+<section id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">How it plays</span>
+      <h2>Simple enough for a coffee break, tricky enough to replay</h2>
+      <p>Play solo against your own memory, or pass the phone back and forth for a two-player match.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <h3>Flip</h3>
+        <p>Tap any two face-down cards to reveal what's underneath.</p>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <h3>Match</h3>
+        <p>Found a pair? It flies over to your score and you go again.</p>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <h3>Miss</h3>
+        <p>No match, no problem — the cards flip back and the turn passes on.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="catalog-section" id="catalog">
+  <div class="wrap">
+    <div class="phone-mock">
+      <div class="phone-screen">
+        <div class="phone-search">🔍 Search items by title</div>
+        <div class="phone-grid">
+          <div class="phone-item">
+            <div class="emoji">🍎</div>
+            <div class="name">Apple</div>
+            <div class="wa">💬 Order on WhatsApp</div>
+          </div>
+          <div class="phone-item">
+            <div class="emoji">🍍</div>
+            <div class="name">Pineapple</div>
+            <div class="wa">💬 Order on WhatsApp</div>
+          </div>
+          <div class="phone-item">
+            <div class="emoji">🥭</div>
+            <div class="name">Mango</div>
+            <div class="wa">💬 Order on WhatsApp</div>
+          </div>
+          <div class="phone-item">
+            <div class="emoji">🍓</div>
+            <div class="name">Strawberry</div>
+            <div class="wa">💬 Order on WhatsApp</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="catalog-copy">
+      <span class="kicker">Browse & order</span>
+      <h2>Every card doubles as something real</h2>
+      <p>Open "Browse & Order" from the main menu to see the whole deck laid out like a catalog. Tap 💬 <strong>Order on WhatsApp</strong> and it opens a chat with your message already typed out — no forms, no accounts.</p>
+      <ul>
+        <li><span class="dot"></span> Search the catalog by name while you decide.</li>
+        <li><span class="dot"></span> One tap starts a real WhatsApp conversation with us.</li>
+        <li><span class="dot"></span> Works completely offline — ordering is the only part that needs a connection.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="fresh">
+  <div class="wrap fresh-band">
+    <div class="wrap" style="padding: 0;">
+      <span class="kicker" style="color:#fff;">Always fresh</span>
+      <h2>New cards, a few times a month</h2>
+      <p>We swap in new pictures roughly three times a month. Updates quietly download in the background, so a game already in progress is never interrupted — you'll just see new cards next time you play.</p>
+    </div>
+    <div>
+      <div class="fresh-card">
+        <div class="label">Update cadence</div>
+        <div class="value">~3× a month</div>
+      </div>
+      <div class="fresh-card">
+        <div class="label">How it updates</div>
+        <div class="value">Silent background sync</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="get">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">Get the app</span>
+      <h2>Play for free, no account needed</h2>
+      <p>Memory Match runs entirely on your device. Grab it below, or ask us to send you the install link directly.</p>
+    </div>
+    <div class="store-row">
+      <a class="store-badge" href="#" aria-label="Coming soon to Google Play">
+        <span>▶</span>
+        <span class="lines"><span class="small">Coming soon to</span><span class="big">Google Play</span></span>
+      </a>
+      <a class="store-badge" href="#" aria-label="Download the APK directly">
+        <span>⬇</span>
+        <span class="lines"><span class="small">Direct download</span><span class="big">Get the APK</span></span>
+      </a>
+    </div>
+    <p class="store-note">Also planning to list on other free app stores as we go — links above will point wherever it lands first.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-brand">© 2026 Memory Match. Made for people who like flipping things over.</div>
+    <ul class="footer-links">
+      <li><a href="privacy.html">Privacy Policy</a></li>
+      <li><a href="manifest.json">manifest.json</a></li>
+      <li><a href="mailto:hello@example.com">Contact</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

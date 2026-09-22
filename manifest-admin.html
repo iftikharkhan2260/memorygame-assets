@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Manifest Builder — Memory Match</title>
+<meta name="robots" content="noindex" />
+<link rel="icon" href="favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+<style>
+  .tool { max-width: 880px; margin: 0 auto; padding: 56px 24px 96px; }
+  .tool h1 { font-size: 30px; margin-bottom: 8px; }
+  .tool > p { margin-bottom: 32px; }
+  .toolbar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+  .toolbar .btn { padding: 10px 18px; font-size: 14px; }
+  input[type=file] { display: none; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--line); }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; text-transform: none; color: var(--ink-soft); font-weight: 600; background: #F4F3FC; }
+  tr:last-child td { border-bottom: none; }
+  input[type=text] {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+  }
+  .row-actions { display: flex; gap: 8px; }
+  .icon-btn {
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .icon-btn:hover { border-color: var(--primary); }
+  .empty-state { text-align: center; padding: 40px; color: var(--ink-soft); }
+  .output {
+    margin-top: 28px;
+    background: #14112B;
+    color: #E7E4F6;
+    border-radius: var(--radius-md);
+    padding: 20px;
+    font-family: monospace;
+    font-size: 13px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 320px;
+    overflow: auto;
+  }
+  .note { font-size: 13px; color: var(--ink-soft); margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <img src="images/app-icon.png" alt="" />
+      Memory Match
+    </a>
+  </div>
+</nav>
+
+<main class="tool">
+  <h1>Manifest Builder</h1>
+  <p>Build or edit <code>manifest.json</code> without hand-writing JSON. Everything here runs in your browser — nothing is uploaded anywhere. When you're done, download the file and commit it to your GitHub Pages repo alongside the matching images.</p>
+
+  <div class="toolbar">
+    <button class="btn btn-primary" id="addRowBtn" type="button">+ Add card</button>
+    <label class="btn btn-ghost" for="importInput">Load existing manifest.json</label>
+    <input type="file" id="importInput" accept="application/json" />
+    <button class="btn btn-ghost" id="touchAllBtn" type="button">Bump all "updatedAt"</button>
+    <button class="btn btn-ghost" id="downloadBtn" type="button">Download manifest.json</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 16%;">ID</th>
+        <th style="width: 22%;">Title</th>
+        <th style="width: 40%;">Image URL</th>
+        <th style="width: 14%;">Updated</th>
+        <th style="width: 8%;"></th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <div class="empty-state" id="emptyState">No cards yet — click "+ Add card" or load an existing manifest.json.</div>
+
+  <div class="note">Tip: <strong>id</strong> must stay the same across updates so the app recognizes it as the same card. Bump <strong>updatedAt</strong> (any changed value works — a number, a date, anything) whenever you replace that card's picture, so the app knows to re-download it.</div>
+
+  <div class="output" id="output" hidden></div>
+</main>
+
+<script>
+  let cards = [];
+
+  const rowsEl = document.getElementById('rows');
+  const emptyStateEl = document.getElementById('emptyState');
+  const outputEl = document.getElementById('output');
+
+  function render() {
+    rowsEl.innerHTML = '';
+    emptyStateEl.style.display = cards.length ? 'none' : 'block';
+    cards.forEach((card, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="text" data-field="id" data-i="${i}" value="${escapeAttr(card.id)}" placeholder="apple" /></td>
+        <td><input type="text" data-field="title" data-i="${i}" value="${escapeAttr(card.title)}" placeholder="Apple" /></td>
+        <td><input type="text" data-field="imageUrl" data-i="${i}" value="${escapeAttr(card.imageUrl)}" placeholder="https://you.github.io/memorygame-assets/images/apple.png" /></td>
+        <td><input type="text" data-field="updatedAt" data-i="${i}" value="${escapeAttr(card.updatedAt)}" placeholder="1" /></td>
+        <td class="row-actions">
+          <button class="icon-btn" data-action="touch" data-i="${i}" title="Bump updatedAt to now">↻</button>
+          <button class="icon-btn" data-action="remove" data-i="${i}" title="Remove card">✕</button>
+        </td>
+      `;
+      rowsEl.appendChild(tr);
+    });
+    updateOutput();
+  }
+
+  function escapeAttr(s) {
+    return String(s ?? '').replace(/"/g, '&quot;');
+  }
+
+  function updateOutput() {
+    outputEl.textContent = JSON.stringify(cards, null, 2);
+  }
+
+  rowsEl.addEventListener('input', (e) => {
+    const field = e.target.dataset.field;
+    const i = Number(e.target.dataset.i);
+    if (field && !Number.isNaN(i)) {
+      cards[i][field] = e.target.value;
+      updateOutput();
+    }
+  });
+
+  rowsEl.addEventListener('click', (e) => {
+    const action = e.target.dataset.action;
+    const i = Number(e.target.dataset.i);
+    if (Number.isNaN(i)) return;
+    if (action === 'remove') {
+      cards.splice(i, 1);
+      render();
+    } else if (action === 'touch') {
+      cards[i].updatedAt = String(Date.now());
+      render();
+    }
+  });
+
+  document.getElementById('addRowBtn').addEventListener('click', () => {
+    cards.push({ id: '', title: '', imageUrl: '', updatedAt: '1' });
+    render();
+    outputEl.hidden = false;
+  });
+
+  document.getElementById('touchAllBtn').addEventListener('click', () => {
+    const now = String(Date.now());
+    cards = cards.map((c) => ({ ...c, updatedAt: now }));
+    render();
+  });
+
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(cards, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'manifest.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('importInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) {
+        cards = parsed.map((c) => ({
+          id: c.id ?? '',
+          title: c.title ?? '',
+          imageUrl: c.imageUrl ?? '',
+          updatedAt: c.updatedAt ?? '1',
+        }));
+        render();
+        outputEl.hidden = false;
+      } else {
+        alert('That file does not look like a manifest.json array.');
+      }
+    } catch (err) {
+      alert('Could not read that file as JSON.');
+    }
+    e.target.value = '';
+  });
+
+  render();
+</script>
+
+</body>
+</html>

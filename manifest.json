@@ -1,0 +1,38 @@
+[
+  {
+    "id": "circle",
+    "title": "Circle",
+    "imageUrl": "https://YOUR_GITHUB_USERNAME.github.io/memorygame-assets/images/circle.png",
+    "updatedAt": "1"
+  },
+  {
+    "id": "square",
+    "title": "Square",
+    "imageUrl": "https://YOUR_GITHUB_USERNAME.github.io/memorygame-assets/images/square.png",
+    "updatedAt": "1"
+  },
+  {
+    "id": "star",
+    "title": "Star",
+    "imageUrl": "https://YOUR_GITHUB_USERNAME.github.io/memorygame-assets/images/star.png",
+    "updatedAt": "1"
+  },
+  {
+    "id": "heart",
+    "title": "Heart",
+    "imageUrl": "https://YOUR_GITHUB_USERNAME.github.io/memorygame-assets/images/heart.png",
+    "updatedAt": "1"
+  },
+  {
+    "id": "diamond",
+    "title": "Diamond",
+    "imageUrl": "https://YOUR_GITHUB_USERNAME.github.io/memorygame-assets/images/diamond.png",
+    "updatedAt": "1"
+  },
+  {
+    "id": "hexagon",
+    "title": "Hexagon",
+    "imageUrl": "https://YOUR_GITHUB_USERNAME.github.io/memorygame-assets/images/hexagon.png",
+    "updatedAt": "1"
+  }
+]
