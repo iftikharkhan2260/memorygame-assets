@@ -21,7 +21,7 @@
   th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
   th { font-size: 12px; text-transform: none; color: var(--ink-soft); font-weight: 600; background: #F4F3FC; }
   tr:last-child td { border-bottom: none; }
-  input[type=text] {
+  input[type=text], textarea {
     width: 100%;
     border: 1px solid var(--line);
     border-radius: 8px;
@@ -29,7 +29,18 @@
     font-family: 'Outfit', sans-serif;
     font-size: 14px;
   }
-  .row-actions { display: flex; gap: 8px; }
+  textarea { resize: vertical; min-height: 42px; }
+  .field-label { font-size: 11px; color: var(--ink-soft); display: block; margin: 8px 0 3px; }
+  .field-label:first-child { margin-top: 0; }
+  .entry {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .entry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+  .entry-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
   .icon-btn {
     background: none;
     border: 1px solid var(--line);
@@ -71,6 +82,7 @@
 <main class="tool">
   <h1>Manifest Builder</h1>
   <p>Build or edit <code>manifest.json</code> without hand-writing JSON. Everything here runs in your browser — nothing is uploaded anywhere. When you're done, download the file and commit it to your GitHub Pages repo alongside the matching images.</p>
+  <p class="note">Prefer not to touch git at all? <a href="admin.html">admin.html</a> does this same job plus image upload and stats, committing straight to GitHub for you (needs a personal access token). This page is the manual, token-free fallback.</p>
 
   <div class="toolbar">
     <button class="btn btn-primary" id="addRowBtn" type="button">+ Add card</button>
@@ -80,21 +92,10 @@
     <button class="btn btn-ghost" id="downloadBtn" type="button">Download manifest.json</button>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th style="width: 16%;">ID</th>
-        <th style="width: 22%;">Title</th>
-        <th style="width: 40%;">Image URL</th>
-        <th style="width: 14%;">Updated</th>
-        <th style="width: 8%;"></th>
-      </tr>
-    </thead>
-    <tbody id="rows"></tbody>
-  </table>
+  <div id="rows" class="card-list"></div>
   <div class="empty-state" id="emptyState">No cards yet — click "+ Add card" or load an existing manifest.json.</div>
 
-  <div class="note">Tip: <strong>id</strong> must stay the same across updates so the app recognizes it as the same card. Bump <strong>updatedAt</strong> (any changed value works — a number, a date, anything) whenever you replace that card's picture, so the app knows to re-download it.</div>
+  <div class="note">Tip: <strong>id</strong> must stay the same across updates so the app recognizes it as the same card. Bump <strong>updatedAt</strong> (any changed value works — a number, a date, anything) whenever you replace that card's picture, so the app knows to re-download it. Leave <strong>visibility limit</strong> blank for unlimited.</div>
 
   <div class="output" id="output" hidden></div>
 </main>
@@ -110,18 +111,33 @@
     rowsEl.innerHTML = '';
     emptyStateEl.style.display = cards.length ? 'none' : 'block';
     cards.forEach((card, i) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><input type="text" data-field="id" data-i="${i}" value="${escapeAttr(card.id)}" placeholder="apple" /></td>
-        <td><input type="text" data-field="title" data-i="${i}" value="${escapeAttr(card.title)}" placeholder="Apple" /></td>
-        <td><input type="text" data-field="imageUrl" data-i="${i}" value="${escapeAttr(card.imageUrl)}" placeholder="https://you.github.io/memorygame-assets/images/apple.png" /></td>
-        <td><input type="text" data-field="updatedAt" data-i="${i}" value="${escapeAttr(card.updatedAt)}" placeholder="1" /></td>
-        <td class="row-actions">
+      const entry = document.createElement('div');
+      entry.className = 'entry';
+      entry.innerHTML = `
+        <div class="entry-grid">
+          <div>
+            <span class="field-label">ID</span>
+            <input type="text" data-field="id" data-i="${i}" value="${escapeAttr(card.id)}" placeholder="apple" />
+            <span class="field-label">Title</span>
+            <input type="text" data-field="title" data-i="${i}" value="${escapeAttr(card.title)}" placeholder="Apple" />
+            <span class="field-label">Image URL</span>
+            <input type="text" data-field="imageUrl" data-i="${i}" value="${escapeAttr(card.imageUrl)}" placeholder="https://you.github.io/memorygame-assets/images/apple.png" />
+          </div>
+          <div>
+            <span class="field-label">Description (optional, shown behind "See more")</span>
+            <textarea data-field="description" data-i="${i}" placeholder="Optional details, pricing, sizing, etc.">${escapeHtml(card.description ?? '')}</textarea>
+            <span class="field-label">Visibility limit (blank = unlimited)</span>
+            <input type="text" data-field="maxFlips" data-i="${i}" value="${escapeAttr(card.maxFlips ?? '')}" placeholder="Unlimited" />
+            <span class="field-label">Updated</span>
+            <input type="text" data-field="updatedAt" data-i="${i}" value="${escapeAttr(card.updatedAt)}" placeholder="1" />
+          </div>
+        </div>
+        <div class="entry-actions">
           <button class="icon-btn" data-action="touch" data-i="${i}" title="Bump updatedAt to now">↻</button>
           <button class="icon-btn" data-action="remove" data-i="${i}" title="Remove card">✕</button>
-        </td>
+        </div>
       `;
-      rowsEl.appendChild(tr);
+      rowsEl.appendChild(entry);
     });
     updateOutput();
   }
@@ -130,8 +146,23 @@
     return String(s ?? '').replace(/"/g, '&quot;');
   }
 
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function normalize(list) {
+    return list.map((c) => ({
+      id: c.id ?? '',
+      title: c.title ?? '',
+      imageUrl: c.imageUrl ?? '',
+      updatedAt: c.updatedAt ?? '1',
+      description: c.description && String(c.description).trim() ? String(c.description).trim() : null,
+      maxFlips: c.maxFlips !== '' && c.maxFlips != null && /^\d+$/.test(String(c.maxFlips)) ? Number(c.maxFlips) : null,
+    }));
+  }
+
   function updateOutput() {
-    outputEl.textContent = JSON.stringify(cards, null, 2);
+    outputEl.textContent = JSON.stringify(normalize(cards), null, 2);
   }
 
   rowsEl.addEventListener('input', (e) => {
@@ -157,7 +188,7 @@
   });
 
   document.getElementById('addRowBtn').addEventListener('click', () => {
-    cards.push({ id: '', title: '', imageUrl: '', updatedAt: '1' });
+    cards.push({ id: '', title: '', imageUrl: '', updatedAt: '1', description: '', maxFlips: '' });
     render();
     outputEl.hidden = false;
   });
@@ -169,7 +200,7 @@
   });
 
   document.getElementById('downloadBtn').addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(cards, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(normalize(cards), null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -192,6 +223,8 @@
           title: c.title ?? '',
           imageUrl: c.imageUrl ?? '',
           updatedAt: c.updatedAt ?? '1',
+          description: c.description ?? '',
+          maxFlips: c.maxFlips == null ? '' : String(c.maxFlips),
         }));
         render();
         outputEl.hidden = false;

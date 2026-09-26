@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin — Memory Match</title>
+<meta name="robots" content="noindex" />
+<link rel="icon" href="favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+<style>
+  .tool { max-width: 960px; margin: 0 auto; padding: 48px 24px 96px; }
+  .tool h1 { font-size: 28px; margin-bottom: 6px; }
+  .tool > p.intro { margin-bottom: 32px; }
+
+  .panel {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .panel h2 { font-size: 18px; margin-bottom: 6px; }
+  .panel .sub { font-size: 13px; color: var(--ink-soft); margin-bottom: 18px; display: block; }
+
+  label.field { display: block; margin-bottom: 16px; }
+  label.field span.lbl { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--ink); }
+  label.field span.hint { display: block; font-size: 12px; color: var(--ink-soft); margin-bottom: 6px; }
+  input[type=text], input[type=password], input[type=number], input[type=file], textarea {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    background: #fff;
+  }
+  textarea { resize: vertical; min-height: 70px; }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .btn-sm { padding: 9px 16px; font-size: 13px; }
+  .btn-row { margin-top: 4px; }
+
+  .connected-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #F4F3FC; border-radius: 10px; padding: 10px 14px; margin-bottom: 24px; font-size: 13px;
+  }
+  .connected-bar .who { color: var(--ink-soft); }
+  .connected-bar a { color: var(--coral); font-weight: 600; text-decoration: none; }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .tab-btn {
+    padding: 10px 18px; border-radius: 999px; border: 1.5px solid var(--line);
+    background: #fff; font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer;
+  }
+  .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 10px 10px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: middle; font-size: 13px; }
+  th { color: var(--ink-soft); font-weight: 600; }
+  td.thumb-cell img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; background: var(--bg); }
+  .muted { color: var(--ink-soft); }
+  .icon-btn {
+    background: none; border: 1px solid var(--line); border-radius: 8px;
+    width: 30px; height: 30px; cursor: pointer; font-size: 13px;
+  }
+  .icon-btn:hover { border-color: var(--primary); }
+
+  .status-line { font-size: 13px; margin-top: 10px; min-height: 18px; }
+  .status-line.ok { color: var(--mint); }
+  .status-line.err { color: var(--coral); }
+  .status-line.busy { color: var(--ink-soft); }
+
+  .stat-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--line); font-size: 14px; }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-label { color: var(--ink); }
+  .stat-value { color: var(--primary); font-weight: 700; }
+
+  #cardForm.editing { border-color: var(--primary); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <img src="images/app-icon.png" alt="" />
+      Memory Match
+    </a>
+    <ul class="nav-links">
+      <li><a href="manifest-admin.html">Manual editor</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="tool">
+  <h1>Admin</h1>
+  <p class="intro">Upload card art, set descriptions and visibility limits, and check flip/match stats — everything here commits straight to your GitHub Pages repo, so every installed app picks it up on its next background sync.</p>
+
+  <!-- ===================== CONNECT PANEL ===================== -->
+  <div class="panel" id="connectPanel">
+    <h2>Connect your GitHub repo</h2>
+    <span class="sub">
+      This isn't a hosted login — there's no server here. You're giving your browser a personal
+      access token so it can write to your own repo on your behalf. The token is stored only in
+      <em>this browser's</em> local storage and is sent only to api.github.com. Use a
+      <strong>fine-grained token</strong> scoped to just this one repository, with "Contents"
+      permission set to Read and write. Create one at
+      <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a>.
+    </span>
+
+    <div class="row2">
+      <label class="field">
+        <span class="lbl">GitHub username / organization</span>
+        <input type="text" id="inOwner" placeholder="yourusername" autocapitalize="off" />
+      </label>
+      <label class="field">
+        <span class="lbl">Repository name</span>
+        <input type="text" id="inRepo" placeholder="memorygame-assets" autocapitalize="off" />
+      </label>
+    </div>
+    <div class="row2">
+      <label class="field">
+        <span class="lbl">Branch</span>
+        <input type="text" id="inBranch" placeholder="main" value="main" autocapitalize="off" />
+      </label>
+      <label class="field">
+        <span class="lbl">Pages base URL</span>
+        <span class="hint">Where this repo is actually served — auto-filled, edit if you deploy from /docs or a custom domain.</span>
+        <input type="text" id="inPagesBase" placeholder="https://yourusername.github.io/memorygame-assets" autocapitalize="off" />
+      </label>
+    </div>
+    <label class="field">
+      <span class="lbl">Personal access token</span>
+      <input type="password" id="inToken" placeholder="github_pat_..." autocapitalize="off" />
+    </label>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="connectBtn" type="button">Connect</button>
+    </div>
+    <div class="status-line" id="connectStatus"></div>
+  </div>
+
+  <!-- ===================== MAIN PANEL ===================== -->
+  <div id="mainPanel" hidden>
+    <div class="connected-bar">
+      <span class="who">Connected to <strong id="repoLabel"></strong></span>
+      <a href="#" id="disconnectLink">Disconnect</a>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="cards" type="button">Cards</button>
+      <button class="tab-btn" data-tab="stats" type="button">Stats</button>
+    </div>
+
+    <!-- ---- CARDS TAB ---- -->
+    <section id="cardsTab">
+      <div class="panel" id="cardForm">
+        <h2 id="formTitle">Add a card</h2>
+        <span class="sub">Uploading an image commits it to <code>images/</code> and updates <code>manifest.json</code> in one go.</span>
+
+        <label class="field">
+          <span class="lbl">Title</span>
+          <input type="text" id="fTitle" placeholder="Apple" />
+        </label>
+
+        <label class="field">
+          <span class="lbl">Description</span>
+          <span class="hint">Shown in the app's catalog behind "See more".</span>
+          <textarea id="fDescription" placeholder="Optional details, pricing, sizing, etc."></textarea>
+        </label>
+
+        <div class="row2">
+          <label class="field">
+            <span class="lbl">Visibility limit</span>
+            <span class="hint">Stop showing this card after it's been flipped this many times per device. Blank = unlimited.</span>
+            <input type="number" id="fMaxFlips" min="1" placeholder="Unlimited" />
+          </label>
+          <label class="field">
+            <span class="lbl">Image</span>
+            <span class="hint" id="imageHint">Required for a new card.</span>
+            <input type="file" id="fImage" accept="image/*" />
+          </label>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" id="saveCardBtn" type="button">Save card</button>
+          <button class="btn btn-ghost" id="cancelEditBtn" type="button" hidden>Cancel edit</button>
+        </div>
+        <div class="status-line" id="formStatus"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Cards in manifest.json</h2>
+        <span class="sub" id="cardsSub">Loading…</span>
+        <table>
+          <thead>
+            <tr><th></th><th>Title</th><th>Visibility</th><th>Description</th><th></th></tr>
+          </thead>
+          <tbody id="cardsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ---- STATS TAB ---- -->
+    <section id="statsTab" hidden>
+      <div class="panel">
+        <h2>Analytics endpoint</h2>
+        <span class="sub">Paste the Google Apps Script Web App URL from <code>analytics-backend/README.md</code>. Stored only in this browser.</span>
+        <label class="field">
+          <span class="lbl">Endpoint URL</span>
+          <input type="text" id="fAnalyticsUrl" placeholder="https://script.google.com/macros/s/.../exec" />
+        </label>
+        <div class="btn-row">
+          <button class="btn btn-primary btn-sm" id="loadStatsBtn" type="button">Load stats</button>
+        </div>
+        <div class="status-line" id="statsStatus"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Flips by territory</h2>
+        <div id="regionStats"><span class="muted">Load stats to see this.</span></div>
+      </div>
+
+      <div class="panel">
+        <h2>Flips & matches by card (all devices)</h2>
+        <div id="cardStats"><span class="muted">Load stats to see this.</span></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+(function () {
+  const GH_API = 'https://api.github.com';
+  const LS_KEYS = { owner: 'gh_owner', repo: 'gh_repo', branch: 'gh_branch', pagesBase: 'gh_pagesBase', token: 'gh_token', analyticsUrl: 'analytics_url' };
+
+  const state = { owner: '', repo: '', branch: 'main', pagesBase: '', token: '' };
+  let cards = [];
+  let editingId = null;
+
+  // ---------- storage helpers ----------
+  function loadState() {
+    state.owner = localStorage.getItem(LS_KEYS.owner) || '';
+    state.repo = localStorage.getItem(LS_KEYS.repo) || '';
+    state.branch = localStorage.getItem(LS_KEYS.branch) || 'main';
+    state.pagesBase = localStorage.getItem(LS_KEYS.pagesBase) || '';
+    state.token = localStorage.getItem(LS_KEYS.token) || '';
+  }
+  function saveState() {
+    localStorage.setItem(LS_KEYS.owner, state.owner);
+    localStorage.setItem(LS_KEYS.repo, state.repo);
+    localStorage.setItem(LS_KEYS.branch, state.branch);
+    localStorage.setItem(LS_KEYS.pagesBase, state.pagesBase);
+    localStorage.setItem(LS_KEYS.token, state.token);
+  }
+  function clearState() {
+    [LS_KEYS.owner, LS_KEYS.repo, LS_KEYS.branch, LS_KEYS.pagesBase, LS_KEYS.token].forEach((k) => localStorage.removeItem(k));
+  }
+
+  // ---------- GitHub API ----------
+  function ghHeaders() {
+    return { Authorization: 'Bearer ' + state.token, Accept: 'application/vnd.github+json' };
+  }
+
+  async function ghGetFile(path) {
+    const url = GH_API + '/repos/' + state.owner + '/' + state.repo + '/contents/' + path + '?ref=' + encodeURIComponent(state.branch);
+    const res = await fetch(url, { headers: ghHeaders() });
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error('GitHub GET ' + path + ' failed (' + res.status + ')');
+    return res.json();
+  }
+
+  async function ghPutFile(path, base64Content, message, sha) {
+    const url = GH_API + '/repos/' + state.owner + '/' + state.repo + '/contents/' + path;
+    const body = { message: message, content: base64Content, branch: state.branch };
+    if (sha) body.sha = sha;
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, ghHeaders()),
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const t = await res.text();
+      throw new Error('GitHub PUT ' + path + ' failed (' + res.status + '): ' + t);
+    }
+    return res.json();
+  }
+
+  async function ghDeleteFile(path, sha, message) {
+    const url = GH_API + '/repos/' + state.owner + '/' + state.repo + '/contents/' + path;
+    const res = await fetch(url, {
+      method: 'DELETE',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, ghHeaders()),
+      body: JSON.stringify({ message: message, sha: sha, branch: state.branch }),
+    });
+    return res.ok;
+  }
+
+  function b64EncodeUnicode(str) {
+    return btoa(unescape(encodeURIComponent(str)));
+  }
+  function b64DecodeUnicode(str) {
+    return decodeURIComponent(escape(atob(str)));
+  }
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result).split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ---------- manifest ----------
+  async function loadManifest() {
+    const file = await ghGetFile('manifest.json');
+    if (!file) return [];
+    const text = b64DecodeUnicode(file.content.replace(/\n/g, ''));
+    try {
+      const parsed = JSON.parse(text);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  async function saveManifest(entries, message) {
+    // Refresh sha right before writing to reduce the odds of a stale-sha conflict
+    // if the repo changed since the page loaded.
+    const latest = await ghGetFile('manifest.json');
+    const sha = latest ? latest.sha : undefined;
+    const content = b64EncodeUnicode(JSON.stringify(entries, null, 2));
+    await ghPutFile('manifest.json', content, message, sha);
+  }
+
+  function slugify(title, existingIds) {
+    let base = title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    if (!base) base = 'card';
+    let id = base;
+    let n = 2;
+    while (existingIds.has(id)) {
+      id = base + '-' + n;
+      n++;
+    }
+    return id;
+  }
+
+  // ---------- UI: connect ----------
+  const connectPanel = document.getElementById('connectPanel');
+  const mainPanel = document.getElementById('mainPanel');
+  const connectStatus = document.getElementById('connectStatus');
+
+  document.getElementById('inOwner').addEventListener('input', autofillPagesBase);
+  document.getElementById('inRepo').addEventListener('input', autofillPagesBase);
+  function autofillPagesBase() {
+    const owner = document.getElementById('inOwner').value.trim();
+    const repo = document.getElementById('inRepo').value.trim();
+    const pagesInput = document.getElementById('inPagesBase');
+    if (owner && repo && !pagesInput.dataset.touched) {
+      pagesInput.value = 'https://' + owner + '.github.io/' + repo;
+    }
+  }
+  document.getElementById('inPagesBase').addEventListener('input', function () {
+    this.dataset.touched = '1';
+  });
+
+  document.getElementById('connectBtn').addEventListener('click', async () => {
+    state.owner = document.getElementById('inOwner').value.trim();
+    state.repo = document.getElementById('inRepo').value.trim();
+    state.branch = document.getElementById('inBranch').value.trim() || 'main';
+    state.pagesBase = document.getElementById('inPagesBase').value.trim().replace(/\/$/, '');
+    state.token = document.getElementById('inToken').value.trim();
+
+    if (!state.owner || !state.repo || !state.token) {
+      connectStatus.className = 'status-line err';
+      connectStatus.textContent = 'Fill in username, repo, and token at least.';
+      return;
+    }
+
+    connectStatus.className = 'status-line busy';
+    connectStatus.textContent = 'Checking access…';
+    try {
+      const res = await fetch(GH_API + '/repos/' + state.owner + '/' + state.repo, { headers: ghHeaders() });
+      if (!res.ok) throw new Error('Could not access that repo (HTTP ' + res.status + '). Check the owner/repo name and that your token has access.');
+      saveState();
+      connectStatus.textContent = '';
+      await enterMainPanel();
+    } catch (err) {
+      connectStatus.className = 'status-line err';
+      connectStatus.textContent = String(err.message || err);
+    }
+  });
+
+  document.getElementById('disconnectLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    clearState();
+    location.reload();
+  });
+
+  async function enterMainPanel() {
+    connectPanel.hidden = true;
+    mainPanel.hidden = false;
+    document.getElementById('repoLabel').textContent = state.owner + '/' + state.repo + ' (' + state.branch + ')';
+    await refreshCards();
+  }
+
+  // ---------- UI: tabs ----------
+  document.querySelectorAll('.tab-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.dataset.tab;
+      document.getElementById('cardsTab').hidden = tab !== 'cards';
+      document.getElementById('statsTab').hidden = tab !== 'stats';
+    });
+  });
+
+  // ---------- UI: cards list ----------
+  const cardsBody = document.getElementById('cardsBody');
+  const cardsSub = document.getElementById('cardsSub');
+
+  async function refreshCards() {
+    cardsSub.textContent = 'Loading…';
+    try {
+      cards = await loadManifest();
+      cardsSub.textContent = cards.length + ' card(s) in manifest.json.';
+      renderCards();
+    } catch (err) {
+      cardsSub.textContent = 'Could not load manifest.json: ' + (err.message || err);
+    }
+  }
+
+  function renderCards() {
+    cardsBody.innerHTML = '';
+    cards.forEach((c) => {
+      const tr = document.createElement('tr');
+
+      const thumbTd = document.createElement('td');
+      thumbTd.className = 'thumb-cell';
+      const img = document.createElement('img');
+      img.src = c.imageUrl || '';
+      img.alt = '';
+      thumbTd.appendChild(img);
+      tr.appendChild(thumbTd);
+
+      const titleTd = document.createElement('td');
+      titleTd.textContent = c.title || c.id;
+      tr.appendChild(titleTd);
+
+      const visTd = document.createElement('td');
+      visTd.textContent = c.maxFlips == null || c.maxFlips === '' ? 'Unlimited' : String(c.maxFlips);
+      tr.appendChild(visTd);
+
+      const descTd = document.createElement('td');
+      descTd.className = 'muted';
+      const desc = c.description || '';
+      descTd.textContent = desc.length > 60 ? desc.slice(0, 60) + '…' : desc;
+      tr.appendChild(descTd);
+
+      const actionsTd = document.createElement('td');
+      const editBtn = document.createElement('button');
+      editBtn.className = 'icon-btn';
+      editBtn.textContent = '✏️';
+      editBtn.title = 'Edit';
+      editBtn.addEventListener('click', () => startEdit(c.id));
+      const delBtn = document.createElement('button');
+      delBtn.className = 'icon-btn';
+      delBtn.textContent = '🗑️';
+      delBtn.title = 'Delete';
+      delBtn.style.marginLeft = '6px';
+      delBtn.addEventListener('click', () => deleteCard(c.id));
+      actionsTd.appendChild(editBtn);
+      actionsTd.appendChild(delBtn);
+      tr.appendChild(actionsTd);
+
+      cardsBody.appendChild(tr);
+    });
+  }
+
+  // ---------- UI: add/edit form ----------
+  const formEl = document.getElementById('cardForm');
+  const formTitle = document.getElementById('formTitle');
+  const fTitle = document.getElementById('fTitle');
+  const fDescription = document.getElementById('fDescription');
+  const fMaxFlips = document.getElementById('fMaxFlips');
+  const fImage = document.getElementById('fImage');
+  const imageHint = document.getElementById('imageHint');
+  const formStatus = document.getElementById('formStatus');
+  const cancelEditBtn = document.getElementById('cancelEditBtn');
+
+  function startEdit(id) {
+    const card = cards.find((c) => c.id === id);
+    if (!card) return;
+    editingId = id;
+    formEl.classList.add('editing');
+    formTitle.textContent = 'Edit "' + (card.title || card.id) + '"';
+    fTitle.value = card.title || '';
+    fDescription.value = card.description || '';
+    fMaxFlips.value = card.maxFlips == null ? '' : card.maxFlips;
+    fImage.value = '';
+    imageHint.textContent = 'Leave blank to keep the current image.';
+    cancelEditBtn.hidden = false;
+    formStatus.textContent = '';
+    window.scrollTo({ top: formEl.offsetTop - 20, behavior: 'smooth' });
+  }
+
+  function resetForm() {
+    editingId = null;
+    formEl.classList.remove('editing');
+    formTitle.textContent = 'Add a card';
+    fTitle.value = '';
+    fDescription.value = '';
+    fMaxFlips.value = '';
+    fImage.value = '';
+    imageHint.textContent = 'Required for a new card.';
+    cancelEditBtn.hidden = true;
+    formStatus.textContent = '';
+  }
+
+  cancelEditBtn.addEventListener('click', resetForm);
+
+  document.getElementById('saveCardBtn').addEventListener('click', async () => {
+    const title = fTitle.value.trim();
+    if (!title) {
+      formStatus.className = 'status-line err';
+      formStatus.textContent = 'Title is required.';
+      return;
+    }
+    const maxFlipsRaw = fMaxFlips.value.trim();
+    if (maxFlipsRaw && (!/^\d+$/.test(maxFlipsRaw) || Number(maxFlipsRaw) <= 0)) {
+      formStatus.className = 'status-line err';
+      formStatus.textContent = 'Visibility limit must be a positive whole number, or blank.';
+      return;
+    }
+    const maxFlips = maxFlipsRaw ? Number(maxFlipsRaw) : null;
+    const file = fImage.files[0];
+
+    if (!editingId && !file) {
+      formStatus.className = 'status-line err';
+      formStatus.textContent = 'Choose an image for a new card.';
+      return;
+    }
+
+    formStatus.className = 'status-line busy';
+    formStatus.textContent = editingId ? 'Saving changes…' : 'Uploading…';
+
+    try {
+      const existingIds = new Set(cards.map((c) => c.id));
+      const id = editingId || slugify(title, existingIds);
+      let imageUrl = editingId ? (cards.find((c) => c.id === editingId) || {}).imageUrl : null;
+      const updatedAt = String(Date.now());
+
+      if (file) {
+        formStatus.textContent = 'Uploading image…';
+        const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+        const path = 'images/' + id + '.' + ext;
+        const base64 = await fileToBase64(file);
+        const existingImage = await ghGetFile(path).catch(() => null);
+        await ghPutFile(path, base64, 'Upload image for ' + id, existingImage ? existingImage.sha : undefined);
+        imageUrl = state.pagesBase + '/' + path;
+      }
+
+      const entry = { id: id, title: title, imageUrl: imageUrl, updatedAt: updatedAt, description: fDescription.value.trim() || null, maxFlips: maxFlips };
+
+      formStatus.textContent = 'Updating manifest.json…';
+      const next = editingId
+        ? cards.map((c) => (c.id === editingId ? entry : c))
+        : cards.concat([entry]);
+
+      await saveManifest(next, (editingId ? 'Update card: ' : 'Add card: ') + title);
+
+      formStatus.className = 'status-line ok';
+      formStatus.textContent = 'Saved. Live on GitHub Pages shortly, then auto-synced to every app.';
+      resetForm();
+      await refreshCards();
+    } catch (err) {
+      formStatus.className = 'status-line err';
+      formStatus.textContent = String(err.message || err);
+    }
+  });
+
+  async function deleteCard(id) {
+    const card = cards.find((c) => c.id === id);
+    if (!card) return;
+    if (!confirm('Delete "' + (card.title || id) + '"? This removes it from manifest.json (and tries to remove its image).')) return;
+
+    try {
+      const next = cards.filter((c) => c.id !== id);
+      await saveManifest(next, 'Delete card: ' + (card.title || id));
+
+      if (card.imageUrl && card.imageUrl.indexOf(state.pagesBase) === 0) {
+        const path = card.imageUrl.slice(state.pagesBase.length + 1);
+        const file = await ghGetFile(path).catch(() => null);
+        if (file) await ghDeleteFile(path, file.sha, 'Remove image for ' + id).catch(() => {});
+      }
+
+      await refreshCards();
+    } catch (err) {
+      alert('Could not delete: ' + (err.message || err));
+    }
+  }
+
+  // ---------- UI: stats ----------
+  const fAnalyticsUrl = document.getElementById('fAnalyticsUrl');
+  const statsStatus = document.getElementById('statsStatus');
+  const regionStatsEl = document.getElementById('regionStats');
+  const cardStatsEl = document.getElementById('cardStats');
+
+  fAnalyticsUrl.value = localStorage.getItem(LS_KEYS.analyticsUrl) || '';
+
+  document.getElementById('loadStatsBtn').addEventListener('click', async () => {
+    const url = fAnalyticsUrl.value.trim();
+    if (!url) {
+      statsStatus.className = 'status-line err';
+      statsStatus.textContent = 'Paste the analytics endpoint URL first.';
+      return;
+    }
+    localStorage.setItem(LS_KEYS.analyticsUrl, url);
+    statsStatus.className = 'status-line busy';
+    statsStatus.textContent = 'Loading…';
+    try {
+      const res = await fetch(url + '?action=summary');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      renderStats(data);
+      statsStatus.textContent = '';
+    } catch (err) {
+      statsStatus.className = 'status-line err';
+      statsStatus.textContent = 'Could not load stats: ' + (err.message || err);
+    }
+  });
+
+  function renderStats(data) {
+    const regions = data.regions || [];
+    const cardStats = data.cards || [];
+
+    regionStatsEl.innerHTML = regions.length
+      ? regions.map((r) => rowHtml(r.region, r.flips + ' flips')).join('')
+      : '<span class="muted">No events recorded yet.</span>';
+
+    cardStatsEl.innerHTML = cardStats.length
+      ? cardStats.map((c) => rowHtml(c.title || c.cardId, c.flips + ' flips · ' + c.matches + ' matches')).join('')
+      : '<span class="muted">No events recorded yet.</span>';
+  }
+
+  function rowHtml(label, value) {
+    return '<div class="stat-row"><span class="stat-label">' + escapeHtml(String(label)) + '</span><span class="stat-value">' + escapeHtml(String(value)) + '</span></div>';
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // ---------- boot ----------
+  loadState();
+  if (state.owner && state.repo && state.token) {
+    document.getElementById('inOwner').value = state.owner;
+    document.getElementById('inRepo').value = state.repo;
+    document.getElementById('inBranch').value = state.branch;
+    document.getElementById('inPagesBase').value = state.pagesBase;
+    document.getElementById('inToken').value = state.token;
+    enterMainPanel();
+  }
+})();
+</script>
+
+</body>
+</html>

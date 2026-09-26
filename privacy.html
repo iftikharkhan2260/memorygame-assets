@@ -45,7 +45,7 @@
   <h2>What's stored on your device</h2>
   <p>Everything the app needs to run lives in a local database on your phone. Nothing here is sent to us or anyone else:</p>
   <ul>
-    <li>The card library (titles, images, and how often each card should appear).</li>
+    <li>The card library (titles, images, descriptions, and how often each card should appear).</li>
     <li>Game history — scores, flip counts, and match counts from past games.</li>
     <li>The admin password, stored as a one-way hash, never as plain text.</li>
     <li>App settings, like the card-update address and the WhatsApp ordering number.</li>
@@ -56,18 +56,20 @@
   <ul>
     <li><strong>Card updates.</strong> Every so often, the app checks a public list of card images we publish and downloads any new or changed ones. This is a standard file download — it doesn't include anything about you or your device.</li>
     <li><strong>WhatsApp ordering.</strong> Tapping "Order on WhatsApp" opens the WhatsApp app with a pre-filled message. From that point on, the conversation is handled by WhatsApp under its own privacy policy — Memory Match doesn't see or store that message.</li>
+    <li><strong>Anonymous play analytics (only if the shop admin has turned it on).</strong> Some installs of this app are configured to record, for each card flip or match: which card, whether it was a flip or a match, a coarse region (state/province-level, guessed from your network connection via a public IP-geolocation lookup — never GPS, never a location permission prompt), and a generic device model string (e.g. "Pixel 7"). There is no name, account, advertising ID, or any other identifier attached to this — it cannot be used to identify you personally, only to show the admin aggregate totals like "how many times was this card flipped" or "how many flips came from this region." This can be turned off per install by the admin; if it's off, none of this is ever sent.</li>
   </ul>
 
   <h2>What we don't do</h2>
   <ul>
     <li>No account creation or sign-in.</li>
     <li>No advertising or ad tracking.</li>
-    <li>No third-party analytics embedded in the app.</li>
-    <li>No selling or sharing of any information — we don't collect enough to share in the first place.</li>
+    <li>No GPS or precise location — ever.</li>
+    <li>No third-party analytics SDK embedded in the app — the optional analytics above is a small, self-hosted endpoint the admin controls, not a third-party tracking service.</li>
+    <li>No selling or sharing of any information.</li>
   </ul>
 
   <h2>The admin area</h2>
-  <p>A hidden admin screen lets whoever runs the deck add, edit, or remove cards, and view local play statistics. It's protected by a password stored only on that device, and the statistics it shows are calculated entirely from that device's own local game history.</p>
+  <p>A hidden admin screen lets whoever runs the deck add, edit, or remove cards, set visibility limits, and view play statistics. It's protected by a password stored only on that device. Local statistics are calculated entirely from that device's own game history; if analytics is turned on (see above), the admin can also see aggregate, anonymous totals gathered across every device.</p>
 
   <h2>Children's use</h2>
   <p>Memory Match doesn't collect personal information from anyone, including children. The ordering feature simply opens WhatsApp with a pre-written message and is intended for use by an adult on the shopper's behalf.</p>
